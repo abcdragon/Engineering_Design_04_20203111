@@ -20,5 +20,5 @@ void loop() {
 }
 
 int toggle_state(int toggle){
-  return count % 2;
+  return (++toggle) % 2;
 }
