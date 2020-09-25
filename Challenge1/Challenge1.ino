@@ -40,40 +40,30 @@ void set_duty(int duty){
   //Serial.println(_off);
 }
 
-int count = 1000;
-auto t = millis();
 void loop() {
   if(Serial.available() > 0){
     float input = Serial.parseFloat();
     set_period(input);
-
-    count = _period == 100 ? 2000 : 1000;
-    t = millis();
-
-    int chk = 0;
-    while(t + count >= millis()){
-       for(int i = 0; i < 101; i++){
-        set_duty(i);
-        digitalWrite(LED_PIN, LOW);
-        delayMicroseconds(_on);
+    
+    int count = _period == 100 ? 2000 : 1000;
+    auto t = millis();
+    
+    for(int i = 0; i < 101 && t + count >= millis(); i++){
+      set_duty(i);
+      digitalWrite(LED_PIN, LOW);
+      delayMicroseconds(_on);
       
-        digitalWrite(LED_PIN, HIGH);
-        delayMicroseconds(_off);
-      }
-      
-      for(int i = 99; i >= 0; i--){
-        set_duty(i);
-        digitalWrite(LED_PIN, LOW);
-        delayMicroseconds(_on);
-      
-        digitalWrite(LED_PIN, HIGH);
-        delayMicroseconds(_off);
-      }
-
-      chk++; 
+      digitalWrite(LED_PIN, HIGH);
+      delayMicroseconds(_off);
     }
-
-    Serial.println(chk);
-    Serial.println(millis() - t);
+    
+    for(int i = 99; i >= 0 && t + count >= millis(); i--){
+      set_duty(i);
+      digitalWrite(LED_PIN, LOW);
+      delayMicroseconds(_on);
+      
+      digitalWrite(LED_PIN, HIGH);
+      delayMicroseconds(_off);
+    }
   }
 }
