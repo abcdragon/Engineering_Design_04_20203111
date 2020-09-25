@@ -47,23 +47,25 @@ void loop() {
     
     int count = _period == 100 ? 2000 : 1000;
     auto t = millis();
-    
-    for(int i = 0; i < 101 && t + count >= millis(); i++){
-      set_duty(i);
-      digitalWrite(LED_PIN, LOW);
-      delayMicroseconds(_on);
+
+    while(t + count >= millis()){
+      for(int i = 0; i < 101 && t + count >= millis(); i++){
+        set_duty(i);
+        digitalWrite(LED_PIN, LOW);
+        delayMicroseconds(_on);
+        
+        digitalWrite(LED_PIN, HIGH);
+        delayMicroseconds(_off);
+      }
       
-      digitalWrite(LED_PIN, HIGH);
-      delayMicroseconds(_off);
-    }
-    
-    for(int i = 99; i >= 0 && t + count >= millis(); i--){
-      set_duty(i);
-      digitalWrite(LED_PIN, LOW);
-      delayMicroseconds(_on);
-      
-      digitalWrite(LED_PIN, HIGH);
-      delayMicroseconds(_off);
+      for(int i = 99; i >= 0 && t + count >= millis(); i--){
+        set_duty(i);
+        digitalWrite(LED_PIN, LOW);
+        delayMicroseconds(_on);
+        
+        digitalWrite(LED_PIN, HIGH);
+        delayMicroseconds(_off);
+      }
     }
   }
 }
