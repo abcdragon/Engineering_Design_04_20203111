@@ -69,10 +69,8 @@ void loop() {
 // adjust servo position according to the USS read value
 
   // add your code here!
-  float duty = (dist_ema - 180.0) / 180;
+  float duty = _DIST_MAX * (dist_ema - 180.0) / 180;
   duty *= _DUTY_MAX;
-  Serial.print(",Duty:");
-  Serial.println(duty);
   myservo.writeMicroseconds(duty);
    
 // update last sampling time
