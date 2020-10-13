@@ -12,7 +12,7 @@
 #define _DIST_MIN 180 // minimum distance to be measured (unit: mm)
 #define _DIST_MAX 360 // maximum distance to be measured (unit: mm)
 
-#define _DIST_ALPHA 0.1
+#define _DIST_ALPHA 0.45
 
 #define _DUTY_MIN 550 // servo full clockwise position (0 degree)
 #define _DUTY_NEU 1480 // servo neutral position (90 degree)
@@ -63,14 +63,12 @@ void loop() {
   Serial.print(dist_raw);
   Serial.print(",servo:");
   Serial.print(myservo.read());  
-  //Serial.println(",High:220,Max:300");
-  Serial.print(",High:220,Max:300");
+  Serial.println(",High:220,Max:300");
 
 // adjust servo position according to the USS read value
 
   // add your code here!
-  float duty = _DIST_MAX * (dist_ema - 180.0) / 180;
-  duty *= _DUTY_MAX;
+  float duty = map(dist_ema, 180, 360, 550, 2410);
   myservo.writeMicroseconds(duty);
    
 // update last sampling time
@@ -88,8 +86,14 @@ float USS_measure(int TRIG, int ECHO)
   reading = pulseIn(ECHO, HIGH, timeout) * scale; // unit: mm
   if(reading < dist_min || reading > dist_max) reading = 0.0; // return 0 when out of range.
 
-  if(reading == 0.0) reading = dist_prev;
-  else dist_prev = reading;
+  if(reading == 0.0) {
+    reading = dist_prev;
+    digitalWrite(PIN_LED, HIGH);
+  }
+  else{
+    dist_prev = reading;
+    digitalWrite(PIN_LED, LOW);
+  }
   
   return reading;
 }
