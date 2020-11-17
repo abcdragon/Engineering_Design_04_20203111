@@ -46,11 +46,11 @@ void loop() {
   Serial.println(ema);
 
   if(ema > 255){
-    servo.writeMicroseconds(800);
+    servo.writeMicroseconds(_DUTY_MIN);
   }
 
   else {
-    servo.writeMicroseconds(1900);
+    servo.writeMicroseconds(_DUTY_MAX);
   }
   
   if(raw_dist > 156 && raw_dist <224) digitalWrite(PIN_LED, 0);
