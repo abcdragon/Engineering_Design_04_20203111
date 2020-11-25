@@ -8,20 +8,20 @@
 #define _DIST_MIN 100
 #define _DIST_MAX 410
 
-#define _DIST_ALPHA 0.0025
+#define _DIST_ALPHA 0.4
 
-#define _DUTY_MIN 800 // 위
+#define _DUTY_MIN 1060 // 위
 #define _DUTY_NEU 1480 
-#define _DUTY_MAX 1900 // 아래
+#define _DUTY_MAX 1840 // 아래
 
-#define _SERVO_ANGLE 10
-#define _SERVO_SPEED 90
+#define _SERVO_ANGLE 30
+#define _SERVO_SPEED 30
 
 #define _INTERVAL_DIST 20 
 #define _INTERVAL_SERVO 20 
 #define _INTERVAL_SERIAL 100 
 
-#define _KP 0.003
+#define _KP 0.004
 
 #define A 70
 #define B 320
@@ -131,6 +131,3 @@ float ir_distance_filtered(){ // return value unit: mm
   dist_raw = ir_distance();
   return dist_ema = _DIST_ALPHA * dist_raw + (1 - _DIST_ALPHA) * dist_ema;
 }
-
-
-  
