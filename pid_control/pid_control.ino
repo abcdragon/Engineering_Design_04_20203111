@@ -8,13 +8,13 @@
 #define _DIST_MIN 100.0
 #define _DIST_MAX 410.0
 
-#define _DIST_ALPHA 0.18
+#define _DIST_ALPHA 0.21
 
 #define LENGTH 30
 #define k_LENGTH 5
 
 #define _DUTY_MIN 1060 // 위
-#define _DUTY_NEU 1400 
+#define _DUTY_NEU 1480 
 #define _DUTY_MAX 1820 // 아래
 
 #define _SERVO_SPEED 1000 // servo speed limit (unit: degree/second)
@@ -215,6 +215,10 @@ float ir_distance_filter() {
   }
 
   float dist_cali = sum / (LENGTH - 2 * k_LENGTH);
-  dist_ema = alpha * dist_cali + (1 - alpha) * dist_ema;
+
+  float tmp = alpha * dist_cali + (1 - alpha) * dist_ema;
+  if(abs(tmp - dist_ema) >= 0.3){
+    dist_ema = alpha * dist_cali + (1 - alpha) * dist_ema;  
+  }
   return dist_ema;
 }
