@@ -4,18 +4,18 @@
 #define PIN_SERVO 10
 #define PIN_IR A0
 
-#define _DIST_TARGET 255.0
-#define _DIST_MIN 100.0
-#define _DIST_MAX 410.0
+#define _DIST_TARGET 255
+#define _DIST_MIN 100
+#define _DIST_MAX 410
 
 #define _DIST_ALPHA 0.21
 
 #define LENGTH 30
 #define k_LENGTH 5
 
-#define _DUTY_MIN 1060 // 위
-#define _DUTY_NEU 1480 
-#define _DUTY_MAX 1820 // 아래
+#define _DUTY_MIN 1210 // 위
+#define _DUTY_NEU 1465 
+#define _DUTY_MAX 1750 // 아래
 
 #define _SERVO_SPEED 1000 // servo speed limit (unit: degree/second)
 #define _RAMPUP_TIME 360 // servo speed rampup (0 to max) time (unit: ms)
@@ -27,19 +27,23 @@
 #define START _DUTY_MIN + 100
 #define END _DUTY_MAX - 100
 
-#define _KP 3
-#define _KD 90
+#define _KP 2.5
+#define _KD 95
+#define _KI 0.02
+#define _MAX_ITERM 25
 
 Servo myservo;
 
 int iter;
 float dist_list[LENGTH], sum, dist_raw, dist_ema, alpha;
+float dist_list2[LENGTH];
 
-float dist_target; // location to send the ball
+float dist_target = _DIST_TARGET; // location to send the ball
 
 unsigned long last_sampling_time_dist, last_sampling_time_servo, last_sampling_time_serial; 
 bool event_dist, event_servo, event_serial;
 
+int index = 0;
 int duty_chg_max; // maximum speed, i.e., duty difference per interval (unit: us/interval)
 int duty_chg_per_interval; // current speed (unit: us/interval)
 int duty_chg_adjust; // duty accelration per interval during ramp up/down period (unit: us/interval^2)
@@ -98,12 +102,15 @@ void loop() {
     event_dist = false;
     dist_raw = ir_distance_filter();
     
-    
   // PID control logic
-    error_curr = _DIST_TARGET - dist_raw; // 목표보다 가까우면 양, 멀면 음
+    error_curr = dist_target - dist_raw; // 목표보다 가까우면 양, 멀면 음
     pterm = _KP * error_curr;
     dterm = _KD * (error_curr - error_prev);
-    control = pterm + dterm;
+    iterm += _KI * error_curr;
+
+    if(iterm >= _MAX_ITERM || iterm <= -_MAX_ITERM) iterm = 0.0;
+    
+    control = pterm + dterm + iterm;
 
   // duty_target = f(duty_neutral, control)
     duty_target = _DUTY_NEU + control;
@@ -147,17 +154,21 @@ void loop() {
   
   if(event_serial) {
     event_serial = false;
-    Serial.print("dist_ir:");
+    Serial.print("IR:");
     Serial.print(dist_raw);
-    Serial.print(",pterm:");
+    Serial.print(",T:");
+    Serial.print(dist_target);
+    Serial.print(",P:");
     Serial.print(map(pterm,-1000,1000,510,610));
-    Serial.print(",dterm:");
+    Serial.print(",D:");
     Serial.print(map(dterm,-1000,1000,510,610));
-    Serial.print(",duty_target:");
-    Serial.print(map(duty_target,1000,2000,410,510));
-    Serial.print(",duty_curr:");
+    Serial.print(",I:");
+    Serial.print(map(iterm,-1000,1000,510,610));
+    Serial.print(",DTT:");
+    Serial.print(map(duty_target, 1000, 2000, 410, 510));
+    Serial.print(",DTC:");
     Serial.print(map(duty_curr,1000,2000,410,510));
-    Serial.println(",Min:100,Low:200,dist_target:255,High:310,Max:410");
+    Serial.println(",-G:245,+G:265,m:0,M:800");
   }
 }
 
@@ -217,8 +228,11 @@ float ir_distance_filter() {
   float dist_cali = sum / (LENGTH - 2 * k_LENGTH);
 
   float tmp = alpha * dist_cali + (1 - alpha) * dist_ema;
-  if(abs(tmp - dist_ema) >= 0.3){
-    dist_ema = alpha * dist_cali + (1 - alpha) * dist_ema;  
+  if(abs(dist_ema - tmp) >= 0.1){
+    dist_ema = tmp;
+  } else {
+    dist_ema = min(dist_ema, tmp);
   }
+  
   return dist_ema;
 }
