@@ -14,7 +14,7 @@
 #define k_LENGTH 5
 
 #define _DUTY_MIN 1210 // 위
-#define _DUTY_NEU 1465 
+#define _DUTY_NEU 1480
 #define _DUTY_MAX 1750 // 아래
 
 #define _SERVO_SPEED 1000 // servo speed limit (unit: degree/second)
@@ -27,10 +27,10 @@
 #define START _DUTY_MIN + 100
 #define END _DUTY_MAX - 100
 
-#define _KP 2.5
-#define _KD 95
-#define _KI 0.02
-#define _MAX_ITERM 25
+#define _KP 1
+#define _KD 90
+#define _KI 0.3
+#define _MAX_ITERM 50
 
 Servo myservo;
 
@@ -107,9 +107,10 @@ void loop() {
     pterm = _KP * error_curr;
     dterm = _KD * (error_curr - error_prev);
     iterm += _KI * error_curr;
-
-    if(iterm >= _MAX_ITERM || iterm <= -_MAX_ITERM) iterm = 0.0;
     
+    iterm = max(iterm, -_MAX_ITERM);
+    iterm = min(iterm, _MAX_ITERM);
+   
     control = pterm + dterm + iterm;
 
   // duty_target = f(duty_neutral, control)
