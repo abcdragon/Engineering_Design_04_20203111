@@ -22,14 +22,14 @@
 
 #define _INTERVAL_DIST 20 
 #define _INTERVAL_SERVO 20 
-#define _INTERVAL_SERIAL 100 
+#define _INTERVAL_SERIAL 100
 
 #define START _DUTY_MIN + 100
 #define END _DUTY_MAX - 100
 
 #define _KP 1
-#define _KD 90
-#define _KI 0.3
+#define _KD 100
+#define _KI 0.8
 #define _MAX_ITERM 50
 
 Servo myservo;
@@ -107,10 +107,12 @@ void loop() {
     pterm = _KP * error_curr;
     dterm = _KD * (error_curr - error_prev);
     iterm += _KI * error_curr;
-    
-    iterm = max(iterm, -_MAX_ITERM);
+
     iterm = min(iterm, _MAX_ITERM);
-   
+    iterm = max(iterm, -_MAX_ITERM);
+    
+    //if(iterm > _MAX_ITERM || iterm < -_MAX_ITERM) iterm = 0;  
+  
     control = pterm + dterm + iterm;
 
   // duty_target = f(duty_neutral, control)
